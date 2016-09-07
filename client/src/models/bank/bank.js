@@ -33,18 +33,31 @@ Bank.prototype = {
   },
   
   accountAverage:function(){
-     var num = this.totalCash()/this.accounts.length;
-     return num;
-   },
+   var num = this.totalCash()/this.accounts.length;
+   return num;
+ },
 
-   addInterest: function() {
-     for( var account of this.accounts ) {
-       var num = account.amount *= 1.1; 
-       num.toFixed(2);
-       account.amount = parseFloat(num);
-       account.comment = account.commentResult()
-     }
+ addInterest: function() {
+   for( var account of this.accounts ) {
+     var num = account.amount *= 1.1; 
+     num.toFixed(2);
+     account.amount = parseFloat(num);
+     account.comment = account.commentResult()
    }
+ },
+
+ addInterestToOne: function(accountToAdd){
+  for( var account of this.accounts ) {
+    
+    if(account === accountToAdd){
+      var num = account.amount *= 1.1; 
+      num.toFixed(2);
+      account.amount = parseFloat(num);
+      account.comment = account.commentResult()
+      return
+    }
+  }
+}
 }
 
 

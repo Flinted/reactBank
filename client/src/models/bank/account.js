@@ -7,6 +7,11 @@ var Account = function(params){
 
 Account.prototype={
   commentResult: function(){
+
+      if(this.amount >=5000000){
+        return "This bank is "+this.owner+"'s now."
+      }
+
       if(this.amount >=50000){
         return "This dick has loadsa money"
       }
@@ -18,6 +23,8 @@ Account.prototype={
       if(this.amount <=50){
         return "This dick has no money"
       }
+
+
 
       return "No comment"
   }

@@ -57,12 +57,24 @@
 	  var account1 = new Account({ owner: "Steve", amount: 50.00, type: "personal" });
 	  var account2 = new Account({ owner: "Dave", amount: 790.00, type: "personal" });
 	  var account3 = new Account({ owner: "Bob", amount: 50000.00, type: "business" });
-	  var account4 = new Account({ owner: "Jeff", amount: 5.00, type: "business" });
+	  var account4 = new Account({ owner: "Claire", amount: 5.00, type: "business" });
+	  var account5 = new Account({ owner: "Alan", amount: 5039.00, type: "personal" });
+	  var account6 = new Account({ owner: "Sally", amount: 400.00, type: "business" });
+	  var account7 = new Account({ owner: "Mike", amount: 9000.00, type: "personal" });
+	  var account8 = new Account({ owner: "Heidi", amount: 677.00, type: "business" });
+	  var account9 = new Account({ owner: "Maximus", amount: 677000.00, type: "corporate" });
+	  var account10 = new Account({ owner: "Sue", amount: 2000000.00, type: "corporate" });
 	
 	  bank.addAccount(account1);
 	  bank.addAccount(account2);
 	  bank.addAccount(account3);
 	  bank.addAccount(account4);
+	  bank.addAccount(account5);
+	  bank.addAccount(account6);
+	  bank.addAccount(account7);
+	  bank.addAccount(account8);
+	  bank.addAccount(account9);
+	  bank.addAccount(account10);
 	
 	  ReactDOM.render(React.createElement(BankBox, { bank: bank }), document.getElementById('app'));
 	};
@@ -21576,6 +21588,40 @@
 	        }
 	      }
 	    }
+	  },
+	
+	  addInterestToOne: function addInterestToOne(accountToAdd) {
+	    var _iteratorNormalCompletion5 = true;
+	    var _didIteratorError5 = false;
+	    var _iteratorError5 = undefined;
+	
+	    try {
+	      for (var _iterator5 = this.accounts[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	        var account = _step5.value;
+	
+	
+	        if (account === accountToAdd) {
+	          var num = account.amount *= 1.1;
+	          num.toFixed(2);
+	          account.amount = parseFloat(num);
+	          account.comment = account.commentResult();
+	          return;
+	        }
+	      }
+	    } catch (err) {
+	      _didIteratorError5 = true;
+	      _iteratorError5 = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	          _iterator5.return();
+	        }
+	      } finally {
+	        if (_didIteratorError5) {
+	          throw _iteratorError5;
+	        }
+	      }
+	    }
 	  }
 	};
 	
@@ -21596,6 +21642,11 @@
 	
 	Account.prototype = {
 	  commentResult: function commentResult() {
+	
+	    if (this.amount >= 5000000) {
+	      return "This bank is " + this.owner + "'s now.";
+	    }
+	
 	    if (this.amount >= 50000) {
 	      return "This dick has loadsa money";
 	    }
@@ -21622,11 +21673,11 @@
 	
 	var React = __webpack_require__(1);
 	var AccountList = __webpack_require__(175);
-	var AccountForm = __webpack_require__(181);
-	var AccountDetailView = __webpack_require__(176);
-	var BankNav = __webpack_require__(178);
-	var AccountSelect = __webpack_require__(179);
-	var InterestButton = __webpack_require__(180);
+	var AccountForm = __webpack_require__(177);
+	var AccountDetailView = __webpack_require__(178);
+	var BankNav = __webpack_require__(179);
+	var AccountSelect = __webpack_require__(180);
+	var InterestButton = __webpack_require__(181);
 	var Account = __webpack_require__(173);
 	
 	var BankBox = React.createClass({
@@ -21634,12 +21685,18 @@
 	
 	
 	  getInitialState: function getInitialState() {
-	    return { bank: this.props.bank, accounts: [], displayAccount: null, title: "We be Bank", total: 0, average: 0 };
+	    return { bank: this.props.bank, accounts: [], displayAccount: null, title: "We Be Bank WBB", total: 0, average: 0 };
 	  },
 	
 	  addInterest: function addInterest() {
 	    console.log('click');
 	    this.state.bank.addInterest();
+	    this.refresh();
+	  },
+	
+	  addInterestToOne: function addInterestToOne() {
+	    var account = this.state.displayAccount;
+	    this.state.bank.addInterestToOne(account);
 	    this.refresh();
 	  },
 	
@@ -21653,15 +21710,18 @@
 	  addAccount: function addAccount(event) {
 	    event.preventDefault();
 	    var name = event.target.name.value;
-	    var amount = event.target.amount.value;
+	    var stringAmount = event.target.amount.value;
+	    var amount = parseInt(stringAmount);
 	    var type = event.target.type.value;
-	    if (type != ('business' || 'personal')) {
-	      type = 'personal';
-	    }
-	
 	    var account = new Account({ owner: name, amount: amount, type: type });
 	    this.state.bank.addAccount(account);
+	    this.clearForm(event);
 	    this.refresh();
+	  },
+	
+	  clearForm: function clearForm(event) {
+	    event.target.name.value = '';
+	    event.target.amount.value = '';
 	  },
 	
 	  selectedAccount: function selectedAccount(event) {
@@ -21674,23 +21734,25 @@
 	  },
 	
 	  refresh: function refresh() {
-	    console.log(this.state.bank);
 	    var accounts = this.state.bank.filteredAccounts();
-	    var total = this.state.bank.totalCash().toFixed(2);
-	    var average = this.state.bank.accountAverage().toFixed(2);
+	    var subTotal = this.state.bank.totalCash();
+	    var total = subTotal.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
+	    var subAverage = this.state.bank.accountAverage();
+	    var average = subAverage.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
 	    this.setState({ accounts: accounts, total: total, average: average });
 	  },
 	
 	  render: function render() {
+	    console.log("rendering main...");
 	    return React.createElement(
 	      'div',
 	      { id: 'main-window' },
 	      React.createElement(BankNav, { title: this.state.title, total: this.state.total, average: this.state.average }),
+	      React.createElement(AccountForm, { add: this.addAccount }),
 	      React.createElement(AccountSelect, { onChange: this.onAccountChange }),
 	      React.createElement(InterestButton, { addInterest: this.addInterest }),
 	      React.createElement(AccountList, { accounts: this.state.accounts, onClick: this.selectedAccount }),
-	      React.createElement(AccountDetailView, { display: this.state.displayAccount }),
-	      React.createElement(AccountForm, { add: this.addAccount })
+	      React.createElement(AccountDetailView, { display: this.state.displayAccount, addInterest: this.addInterestToOne })
 	    );
 	  }
 	});
@@ -21704,7 +21766,7 @@
 	'use strict';
 	
 	var React = __webpack_require__(1);
-	var AccountRow = __webpack_require__(177);
+	var AccountRow = __webpack_require__(176);
 	
 	var AccountList = function AccountList(props) {
 	  if (!props.accounts) {
@@ -21732,6 +21794,81 @@
 /* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
+	
+	var React = __webpack_require__(1);
+	
+	var AccountRow = function AccountRow(props) {
+	  var img = "/images/" + props.account.type + ".png";
+	  var amountToShow = props.account.amount;
+	  var displayAmount = amountToShow.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
+	
+	  return React.createElement(
+	    "li",
+	    { value: props.index, className: "account-row", onClick: props.onClick },
+	    React.createElement(
+	      "p",
+	      null,
+	      props.account.owner
+	    ),
+	    React.createElement(
+	      "p",
+	      null,
+	      displayAmount
+	    ),
+	    React.createElement(
+	      "p",
+	      null,
+	      props.account.type
+	    ),
+	    React.createElement("img", { className: "account-image", src: img })
+	  );
+	};
+	
+	module.exports = AccountRow;
+
+/***/ },
+/* 177 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(1);
+	
+	var AccountForm = function AccountForm(props) {
+	  return React.createElement(
+	    'div',
+	    null,
+	    React.createElement(
+	      'form',
+	      { id: 'account-form', onSubmit: props.add },
+	      React.createElement('input', { type: 'text', id: 'name', required: 'true', placeholder: 'Name...' }),
+	      React.createElement('input', { type: 'number', id: 'amount', required: 'true', placeholder: 'Amount' }),
+	      React.createElement(
+	        'select',
+	        { id: 'type' },
+	        React.createElement(
+	          'option',
+	          null,
+	          'business'
+	        ),
+	        React.createElement(
+	          'option',
+	          null,
+	          'personal'
+	        )
+	      ),
+	      React.createElement('input', { type: 'submit', id: 'submit', value: 'Add Account' })
+	    )
+	  );
+	};
+	
+	module.exports = AccountForm;
+
+/***/ },
+/* 178 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 	
 	var React = __webpack_require__(1);
@@ -21739,12 +21876,18 @@
 	var AccountDetailView = function AccountDetailView(props) {
 	  if (!props.display) {
 	    return React.createElement(
-	      'h1',
-	      null,
-	      'I am the detail view'
+	      'div',
+	      { id: 'placeholder' },
+	      React.createElement(
+	        'h1',
+	        { className: 'sub-head' },
+	        'please select an account for more information'
+	      ),
+	      React.createElement('img', { id: 'logo', src: '/images/logo.png' })
 	    );
 	  }
-	
+	  var amountToShow = props.display.amount;
+	  var displayAmount = amountToShow.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
 	  return React.createElement(
 	    'div',
 	    { id: 'account-detail-view' },
@@ -21756,8 +21899,7 @@
 	    React.createElement(
 	      'h2',
 	      null,
-	      '£',
-	      props.display.amount.toFixed(2)
+	      displayAmount
 	    ),
 	    React.createElement(
 	      'h2',
@@ -21769,6 +21911,11 @@
 	      'h4',
 	      null,
 	      props.display.comment
+	    ),
+	    React.createElement(
+	      'button',
+	      { id: 'add-interest-to-one', onClick: props.addInterest },
+	      'Add interest'
 	    )
 	  );
 	};
@@ -21776,30 +21923,7 @@
 	module.exports = AccountDetailView;
 
 /***/ },
-/* 177 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(1);
-	
-	var AccountRow = function AccountRow(props) {
-	  return React.createElement(
-	    'li',
-	    { value: props.index, onClick: props.onClick },
-	    props.account.owner,
-	    React.createElement('br', null),
-	    '£',
-	    props.account.amount.toFixed(2),
-	    React.createElement('br', null),
-	    props.account.type
-	  );
-	};
-	
-	module.exports = AccountRow;
-
-/***/ },
-/* 178 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21818,13 +21942,13 @@
 	        React.createElement(
 	            'h4',
 	            null,
-	            'Total: £',
+	            'Total funds: ',
 	            props.total
 	        ),
 	        React.createElement(
 	            'h4',
 	            null,
-	            'Average: £',
+	            'Average funds: ',
 	            props.average
 	        )
 	    );
@@ -21833,7 +21957,7 @@
 	module.exports = BankNav;
 
 /***/ },
-/* 179 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21847,7 +21971,7 @@
 	        React.createElement(
 	            'option',
 	            { value: '' },
-	            'All'
+	            'All Accounts'
 	        ),
 	        React.createElement(
 	            'option',
@@ -21858,6 +21982,11 @@
 	            'option',
 	            { value: 'personal' },
 	            'Personal'
+	        ),
+	        React.createElement(
+	            'option',
+	            { value: 'corporate' },
+	            'Corporate'
 	        )
 	    );
 	};
@@ -21865,7 +21994,7 @@
 	module.exports = AccountSelect;
 
 /***/ },
-/* 180 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21877,36 +22006,11 @@
 	  return React.createElement(
 	    'button',
 	    { id: 'interest-button', onClick: props.addInterest },
-	    'Add Interest'
+	    'Add Interest to all accounts'
 	  );
 	};
 	
 	module.exports = InterestButton;
-
-/***/ },
-/* 181 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(1);
-	
-	var AccountForm = function AccountForm(props) {
-	  return React.createElement(
-	    'div',
-	    null,
-	    React.createElement(
-	      'form',
-	      { id: 'account-form', onSubmit: props.add },
-	      React.createElement('input', { type: 'text', id: 'name', placeholder: 'Name...' }),
-	      React.createElement('input', { type: 'number', id: 'amount', placeholder: 'Amount' }),
-	      React.createElement('input', { type: 'text', id: 'type', placeholder: 'Business or Personal' }),
-	      React.createElement('input', { type: 'submit', value: 'Add Account' })
-	    )
-	  );
-	};
-	
-	module.exports = AccountForm;
 
 /***/ }
 /******/ ]);
